@@ -1,7 +1,8 @@
 {
-  "name": "Kulturnatten 2026 Map",
+  "name": "Kulturnatten-Karte 2026",
   "short_name": "Kulturnatten",
-  "description": "Map of the Copenhagen Culture Night 2026 programme.",
+  "description": "Karte zum Programm der Kopenhagener Kulturnacht 2026.",
+  "lang": "de",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

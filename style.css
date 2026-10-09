@@ -71,15 +71,26 @@ a { color: var(--accent); }
   display: flex;
   gap: 6px;
   padding: calc(var(--safe-top) + 8px) calc(var(--safe-right) + 10px) 8px calc(var(--safe-left) + 10px);
+  flex-wrap: nowrap;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  pointer-events: none;
-}
-.chips::-webkit-scrollbar { display: none; }
-.chip {
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  /* iOS: a scroller with pointer-events:none does not scroll, so the bar takes all touches. */
   pointer-events: auto;
+  /* hint that it scrolls: fade at the right edge (removed once scrolled to the end) */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+}
+.chips[data-at-end="true"] { -webkit-mask-image: none; mask-image: none; }
+.chips::-webkit-scrollbar { display: none; }
+/* spacer: room after the last chip (padding-right is ignored in a scrolling flex row on Safari) */
+.chips::after { content: ""; flex: 0 0 4px; }
+.chip {
   flex: 0 0 auto;
+  touch-action: pan-x;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -234,7 +245,8 @@ a { color: var(--accent); }
 }
 .sheet h2 { margin: 2px 40px 2px 0; font-size: 19px; line-height: 1.25; }
 .sheet .kicker { margin: 4px 40px 0 0; font-size: 12.5px; color: var(--muted); font-weight: 600; letter-spacing: 0.01em; }
-.sheet .venue { margin: 2px 0 0; font-weight: 600; }
+.sheet .orig { margin: 2px 40px 0 0; font-size: 12.5px; color: var(--muted); font-style: italic; }
+.sheet .venue { margin: 4px 0 0; font-weight: 600; }
 .sheet .addr { margin: 0; color: var(--muted); font-size: 14px; }
 .sheet .when { margin: 8px 0 0; font-size: 14px; }
 .state { font-weight: 700; }

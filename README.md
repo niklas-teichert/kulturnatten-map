@@ -5,11 +5,14 @@ Eine schlichte, mobile Vollbildkarte zum Programm der Kopenhagener Kulturnacht
 
 - Jede Veranstaltung ist ein kleiner farbiger Punkt (Farbe = Veranstaltungsart). Es gibt keine
   Pins und keine Cluster, damit die Karte lesbar bleibt.
-- Oben stehen Filter-Chips je Veranstaltungsart (Mehrfachauswahl), dazu „All“, „★ Favorites“ und
-  „Now / soon“ (läuft gerade oder beginnt innerhalb einer Stunde, Kopenhagener Zeit).
+- Oben stehen Filter-Chips je Veranstaltungsart (Mehrfachauswahl), dazu „Alle“, „★ Favoriten“ und
+  „Jetzt / bald“ (läuft gerade oder beginnt innerhalb einer Stunde, Kopenhagener Zeit). Die Leiste
+  lässt sich seitlich wischen; der Verlauf am rechten Rand zeigt, dass noch mehr kommt.
+- Oberfläche und Inhalte sind deutsch: Titel und Programmpunkte sind übersetzt, der Originaltitel
+  steht klein darunter. Orte und Adressen bleiben im Original.
 - Ein Tipp auf einen Punkt öffnet ein Blatt von unten: Titel, Ort, Adresse, Zeiten, Programmpunkte,
-  Arten, Favorit, „Add to route“, offizielle Seite, Wegbeschreibung (Apple Karten auf iOS, sonst
-  Google Maps).
+  Arten, Favorit, „Zur Route hinzufügen“, offizielle Seite, Wegbeschreibung (Apple Karten auf iOS,
+  sonst Google Maps).
 - Eigene Route: Stopps sammeln, umsortieren, „nächster zuerst“ ab dem eigenen Standort und als
   Fußweg in Google Maps öffnen. Mehr als 9 Zwischenstopps werden in Teilstrecken geteilt.
 - Der eigene Standort erscheint als blauer Punkt mit Genauigkeitskreis. Das braucht HTTPS.
@@ -49,6 +52,17 @@ mit ihren Zahlen fest, zum Vergleich auch die Zahl des offiziellen Filters.
 
 Für ein anderes Jahr müssen `EVENT_DATE` und `UTC_OFFSET` oben im Skript angepasst werden.
 
+### Deutsche Titel
+
+Die Übersetzung wurde einmalig am 09.10.2026 gemacht, von Claude, nicht maschinell beim Abruf. Sie
+liegt in `translations_de.json` (Originaltitel → deutscher Titel). `fetch_events.py` wendet diese
+Datei bei jedem Lauf an und schreibt `title` (deutsch) und `title_orig` (Original), für
+Veranstaltungen und Programmpunkte.
+
+Neue oder geänderte Titel bleiben nach einem Neuabruf im Original, und `meta.json` zählt sie unter
+`untranslated_titles`. Wer sie übersetzen will, ergänzt sie in `translations_de.json` und lässt das
+Skript noch einmal laufen. Mit `--cache` holt es dabei nichts neu.
+
 ## Lokal ansehen
 
 ```bash
@@ -63,4 +77,5 @@ Danach <http://localhost:8000> öffnen. Der Standort funktioniert nur über HTTP
 |---|---|
 | `index.html`, `style.css`, `app.js` | die App |
 | `events.json`, `meta.json` | die Programmdaten, erzeugt von `fetch_events.py` |
+| `translations_de.json` | deutsche Titel, angewendet von `fetch_events.py` |
 | `manifest.webmanifest`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png` | für „Zum Home-Bildschirm“ |

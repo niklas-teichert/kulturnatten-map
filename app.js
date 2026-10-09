@@ -2,18 +2,18 @@
 (function () {
   'use strict';
 
-  // Official "Event type" values (Danish) -> short English label + dot colour.
+  // Official "Event type" values (Danish) -> German label + dot colour.
   const TYPE_INFO = {
-    'Opdagelse på egen hånd': { label: 'Explore on your own', color: '#6d28d9' },
-    'Udstilling': { label: 'Exhibition', color: '#dc2626' },
-    'Rundvisning': { label: 'Guided tour', color: '#0284c7' },
-    'Musik': { label: 'Music', color: '#ea580c' },
+    'Opdagelse på egen hånd': { label: 'Auf eigene Faust entdecken', color: '#6d28d9' },
+    'Udstilling': { label: 'Ausstellung', color: '#dc2626' },
+    'Rundvisning': { label: 'Führung', color: '#0284c7' },
+    'Musik': { label: 'Musik', color: '#ea580c' },
     'Workshop': { label: 'Workshop', color: '#15803d' },
-    'Koncert': { label: 'Concert', color: '#db2777' },
-    'Foredrag': { label: 'Talk', color: '#1e3a8a' },
-    'Lysinstallation': { label: 'Light installation', color: '#ca8a04' },
-    'Forestilling': { label: 'Show', color: '#0f766e' },
-    'Teater og optræden': { label: 'Theatre & stage', color: '#92400e' },
+    'Koncert': { label: 'Konzert', color: '#db2777' },
+    'Foredrag': { label: 'Vortrag', color: '#1e3a8a' },
+    'Lysinstallation': { label: 'Lichtinstallation', color: '#ca8a04' },
+    'Forestilling': { label: 'Vorstellung', color: '#0f766e' },
+    'Teater og optræden': { label: 'Theater & Auftritt', color: '#92400e' },
   };
   const EXTRA_COLORS = ['#475569', '#4d7c0f', '#be185d', '#7c2d12'];
   const OTHER_COLOR = '#64748b';
@@ -101,16 +101,16 @@
   const fmtTimes = (pairs) => pairs.map((t) => t[0] + (t[1] ? '–' + t[1] : '')).join(', ');
   function minutesUntil(d, now) { return Math.max(1, Math.round((d - now) / 60000)); }
   function venueStatus(ev, now) {
-    if (ev.canceled) return '<span class="state canceled">Cancelled</span>';
+    if (ev.canceled) return '<span class="state canceled">Abgesagt</span>';
     const o = ev._open;
     if (!o) return '';
     if (now < o.s) {
       return o.s - now <= SOON_MS
-        ? '<span class="state soon">Opens in ' + minutesUntil(o.s, now) + ' min</span>'
-        : 'Opens ' + esc(ev.start);
+        ? '<span class="state soon">Öffnet in ' + minutesUntil(o.s, now) + ' Min.</span>'
+        : 'Öffnet um ' + esc(ev.start);
     }
-    if (now < o.e) return '<span class="state now">Open now</span>';
-    return '<span class="state over">Closed</span>';
+    if (now < o.e) return '<span class="state now">Jetzt geöffnet</span>';
+    return '<span class="state over">Geschlossen</span>';
   }
 
   // ---------------------------------------------------------------- geometry
@@ -128,7 +128,7 @@
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' +
-      ' · Programme: <a href="https://kulturnatten.dk/en/program-map/" target="_blank" rel="noopener">kulturnatten.dk</a>',
+      ' · Programm: <a href="https://kulturnatten.dk/en/program-map/" target="_blank" rel="noopener">kulturnatten.dk</a>',
   }).addTo(map);
   map.setView([55.6761, 12.5683], 13);
 
@@ -180,7 +180,7 @@
     const n = state.route.length;
     $('routeCount').textContent = n;
     $('routeBtn').dataset.empty = String(n === 0);
-    $('routeBtn').setAttribute('aria-label', n ? 'Show route (' + n + ' stops)' : 'Show route');
+    $('routeBtn').setAttribute('aria-label', n ? 'Route anzeigen (' + n + (n === 1 ? ' Stopp)' : ' Stopps)') : 'Route anzeigen');
   }
 
   function routeStops() {
@@ -213,9 +213,9 @@
   function renderChips(now) {
     const nowCount = mappable.filter((ev) => isNowSoon(ev, now)).length;
     const anyFilter = state.types.size || state.fav || state.now;
-    let html = chip('all', '', 'All', mappable.length, !anyFilter) +
-      chip('fav', '', '★ Favorites', state.favs.size, state.fav) +
-      chip('now', '', 'Now / soon', nowCount, state.now) +
+    let html = chip('all', '', 'Alle', mappable.length, !anyFilter) +
+      chip('fav', '', '★ Favoriten', state.favs.size, state.fav) +
+      chip('now', '', 'Jetzt / bald', nowCount, state.now) +
       '<span class="chip-sep" aria-hidden="true"></span>';
     for (const t of typeOrder) {
       html += chip('type', t, (TYPE_INFO[t] && TYPE_INFO[t].label) || t, typeCount[t] || 0, state.types.has(t), typeColor[t]);
@@ -224,6 +224,7 @@
     const scroll = el.scrollLeft;
     el.innerHTML = html;
     el.scrollLeft = scroll;
+    updateChipFade();
   }
   function chip(kind, type, label, count, pressed, color) {
     return '<button type="button" class="chip" data-kind="' + kind + '" data-type="' + esc(type) + '" aria-pressed="' + pressed + '"' +
@@ -231,6 +232,16 @@
       (color ? '<span class="swatch" style="background:' + color + '"></span>' : '') +
       esc(label) + ' <span class="n">' + count + '</span></button>';
   }
+  // The chip bar sits outside the map container; keep Leaflet out of its touches anyway.
+  L.DomEvent.disableClickPropagation($('chips'));
+  L.DomEvent.disableScrollPropagation($('chips'));
+  function updateChipFade() {
+    const el = $('chips');
+    el.dataset.atEnd = String(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
+  }
+  $('chips').addEventListener('scroll', updateChipFade, { passive: true });
+  window.addEventListener('resize', updateChipFade);
+
   $('chips').addEventListener('click', (e) => {
     const btn = e.target.closest('.chip');
     if (!btn) return;
@@ -238,7 +249,7 @@
     if (kind === 'all') { state.types.clear(); state.fav = false; state.now = false; }
     if (kind === 'fav') {
       state.fav = !state.fav;
-      if (state.fav && !state.favs.size) toast('No favorites yet. Open an event and tap ☆ Favorite.');
+      if (state.fav && !state.favs.size) toast('Noch keine Favoriten. Öffne eine Veranstaltung und tippe auf „☆ Favorit“.');
     }
     if (kind === 'now') state.now = !state.now;
     if (kind === 'type') {
@@ -355,20 +366,21 @@
     $('eventBody').innerHTML =
       (kicker ? '<p class="kicker">' + esc(kicker) + '</p>' : '') +
       '<h2 id="evTitle">' + esc(ev.title) + '</h2>' +
+      (ev.title_orig && ev.title_orig !== ev.title ? '<p class="orig" lang="en">' + esc(ev.title_orig) + '</p>' : '') +
       (ev.venue && ev.venue !== ev.title ? '<p class="venue">' + esc(ev.venue) + '</p>' : '') +
       (ev.address ? '<p class="addr">' + esc(ev.address) + '</p>' : '') +
       '<p class="when">' + (ev.start || ev.end ? esc(fmtTimes([[ev.start || '?', ev.end]])) + ' · ' : '') +
-      venueStatus(ev, now) + (ev.sold_out ? ' · <span class="state over">Sold out</span>' : '') + '</p>' +
+      venueStatus(ev, now) + (ev.sold_out ? ' · <span class="state over">Ausverkauft</span>' : '') + '</p>' +
       (tags ? '<ul class="tags">' + tags + '</ul>' : '') +
       '<div class="actions">' +
       '<button type="button" class="btn' + (isFav ? ' on' : '') + '" data-act="fav" aria-pressed="' + isFav + '">' +
-      (isFav ? '★ Favorite' : '☆ Favorite') + '</button>' +
+      (isFav ? '★ Favorit' : '☆ Favorit') + '</button>' +
       '<button type="button" class="btn' + (inRoute ? ' on' : '') + '" data-act="route">' +
-      (inRoute ? '− Remove from route' : '+ Add to route') + '</button>' +
-      '<a class="btn primary" href="' + esc(ev.url) + '" target="_blank" rel="noopener">Open official page</a>' +
-      (ev.lat != null ? '<a class="btn" href="' + esc(directionsUrl(ev)) + '" target="_blank" rel="noopener">Directions</a>' : '') +
+      (inRoute ? '− Aus Route entfernen' : '+ Zur Route hinzufügen') + '</button>' +
+      '<a class="btn primary" href="' + esc(ev.url) + '" target="_blank" rel="noopener">Offizielle Seite öffnen</a>' +
+      (ev.lat != null ? '<a class="btn" href="' + esc(directionsUrl(ev)) + '" target="_blank" rel="noopener">Wegbeschreibung</a>' : '') +
       '</div>' +
-      (items ? '<p class="section-title">Programme</p><ul class="programme">' + items + '</ul>' : '');
+      (items ? '<p class="section-title">Programm</p><ul class="programme">' + items + '</ul>' : '');
   }
   $('eventBody').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-act]');
@@ -382,7 +394,7 @@
       const i = state.route.indexOf(id);
       if (i >= 0) state.route.splice(i, 1); else state.route.push(id);
       save(STORE.route, state.route);
-      if (i < 0) toast('Added as stop ' + state.route.length + ' of your route.', 2500);
+      if (i < 0) toast('Als Stopp ' + state.route.length + ' zur Route hinzugefügt.', 2500);
     }
     renderEventSheet();
     renderMap();
@@ -413,38 +425,38 @@
 
   function renderRouteSheet() {
     const stops = state.route.map((id) => byId.get(id)).filter(Boolean);
-    let body = '<h2 id="routeTitle">My route</h2>';
+    let body = '<h2 id="routeTitle">Meine Route</h2>';
     if (!stops.length) {
-      body += '<p class="note">No stops yet. Tap a dot on the map, then “+ Add to route”.</p>';
+      body += '<p class="note">Noch keine Stopps. Tippe auf einen Punkt auf der Karte und dann auf „+ Zur Route hinzufügen“.</p>';
       $('routeBody').innerHTML = body;
       return;
     }
     let km = 0;
     for (let i = 1; i < stops.length; i++) km += distM(stops[i - 1], stops[i]) / 1000;
-    body += '<p class="note">' + stops.length + (stops.length === 1 ? ' stop' : ' stops') +
-      (stops.length > 1 ? ' · about ' + km.toFixed(1) + ' km between stops (straight line)' : '') + '</p>';
+    body += '<p class="note">' + stops.length + (stops.length === 1 ? ' Stopp' : ' Stopps') +
+      (stops.length > 1 ? ' · etwa ' + km.toFixed(1).replace('.', ',') + ' km zwischen den Stopps (Luftlinie)' : '') + '</p>';
     body += '<ol class="stops">' + stops.map((ev, i) =>
       '<li data-id="' + ev.id + '"><span class="num">' + (i + 1) + '</span>' +
       '<button type="button" class="what" data-act="show"><b>' + esc(ev.venue || ev.title) + '</b><small>' +
-      esc([ev.canceled ? 'CANCELLED' : '', ev.start && ev.end ? ev.start + '–' + ev.end : '', ev.venue && ev.venue !== ev.title ? ev.title : ''].filter(Boolean).join(' · ')) +
+      esc([ev.canceled ? 'ABGESAGT' : '', ev.start && ev.end ? ev.start + '–' + ev.end : '', ev.venue && ev.venue !== ev.title ? ev.title : ''].filter(Boolean).join(' · ')) +
       '</small></button>' +
-      '<button type="button" class="icon-btn" data-act="up" aria-label="Move up"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
-      '<button type="button" class="icon-btn" data-act="down" aria-label="Move down"' + (i === stops.length - 1 ? ' disabled' : '') + '>↓</button>' +
-      '<button type="button" class="icon-btn" data-act="remove" aria-label="Remove">✕</button></li>').join('') + '</ol>';
+      '<button type="button" class="icon-btn" data-act="up" aria-label="Nach oben"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+      '<button type="button" class="icon-btn" data-act="down" aria-label="Nach unten"' + (i === stops.length - 1 ? ' disabled' : '') + '>↓</button>' +
+      '<button type="button" class="icon-btn" data-act="remove" aria-label="Entfernen">✕</button></li>').join('') + '</ol>';
     const legs = routeLegs(stops.filter((ev) => ev.lat != null));
     body += '<div class="route-actions">' +
       '<button type="button" class="btn" data-act="sort"' + (stops.length < 2 ? ' disabled' : '') + '>' +
-      (state.me ? 'Order by distance from me' : 'Order by distance (from stop 1)') + '</button>';
+      (state.me ? 'Nach Entfernung sortieren' : 'Nach Entfernung sortieren (ab Stopp 1)') + '</button>';
     if (legs.length) {
       body += '<a class="btn primary" href="' + esc(legs[0].url) + '" target="_blank" rel="noopener">' +
-        (legs.length > 1 ? 'Open walking route, stops ' + legs[0].from + '–' + legs[0].to : 'Open walking route in Google Maps') + '</a>';
+        (legs.length > 1 ? 'Fußweg in Google Maps öffnen, Stopps ' + legs[0].from + '–' + legs[0].to : 'Fußweg in Google Maps öffnen') + '</a>';
     }
     if (legs.length > 1) {
-      body += '<p class="note">Google Maps takes at most ' + MAX_WAYPOINTS + ' stops in between, so the route is split into ' +
-        legs.length + ' parts:</p>' + legs.slice(1).map((leg) =>
-        '<a class="btn" href="' + esc(leg.url) + '" target="_blank" rel="noopener">Next part: stops ' + leg.from + '–' + leg.to + '</a>').join('');
+      body += '<p class="note">Google Maps nimmt höchstens ' + MAX_WAYPOINTS + ' Zwischenstopps. Die Route ist deshalb in ' +
+        legs.length + ' Teile geteilt:</p>' + legs.slice(1).map((leg) =>
+        '<a class="btn" href="' + esc(leg.url) + '" target="_blank" rel="noopener">Nächster Teil: Stopps ' + leg.from + '–' + leg.to + '</a>').join('');
     }
-    body += '</div>' + (state.me ? '' : '<p class="note">Tip: tap the location button to start the route from where you are.</p>');
+    body += '</div>' + (state.me ? '' : '<p class="note">Tipp: Tippe unten rechts auf „Mein Standort“, damit die Route bei dir beginnt.</p>');
     $('routeBody').innerHTML = body;
   }
 
@@ -477,7 +489,7 @@
     if (act === 'up' && i > 0) state.route.splice(i - 1, 0, state.route.splice(i, 1)[0]);
     if (act === 'down' && i >= 0 && i < state.route.length - 1) state.route.splice(i + 1, 0, state.route.splice(i, 1)[0]);
     if (act === 'remove' && i >= 0) state.route.splice(i, 1);
-    if (act === 'sort') { sortByDistance(); toast(state.me ? 'Ordered from your position.' : 'Ordered from stop 1.', 2500); }
+    if (act === 'sort') { sortByDistance(); toast(state.me ? 'Ab deinem Standort sortiert.' : 'Ab Stopp 1 sortiert.', 2500); }
     save(STORE.route, state.route);
     renderRouteSheet();
     renderMap();
@@ -510,20 +522,20 @@
 
   function geoError(err, loud) {
     const msgs = {
-      1: 'Location is blocked. Allow it for this site in your browser settings (iPhone: Settings › Privacy & Security › Location Services › Safari Websites).',
-      2: 'Your position is not available right now.',
-      3: 'Finding your position took too long. Try again.',
+      1: 'Der Standortzugriff ist blockiert. Erlaube ihn für diese Seite in den Browser-Einstellungen (iPhone: Einstellungen › Datenschutz & Sicherheit › Ortungsdienste › Safari-Websites).',
+      2: 'Dein Standort ist gerade nicht verfügbar.',
+      3: 'Die Standortsuche hat zu lange gedauert. Bitte noch einmal versuchen.',
     };
     if (err.code === 1 && watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
     if (err.code === 1) save(STORE.geo, false);
     locateBtn.classList.remove('active');
     locateBtn.classList.add('error');
-    if (loud) toast(msgs[err.code] || 'Location error.', 6000);
+    if (loud) toast(msgs[err.code] || 'Der Standort konnte nicht bestimmt werden.', 6000);
   }
 
   function startWatch(loud) {
-    if (!('geolocation' in navigator)) { if (loud) toast('This browser has no location support.'); return; }
-    if (!window.isSecureContext) { if (loud) toast('Location needs a secure (https) connection.'); return; }
+    if (!('geolocation' in navigator)) { if (loud) toast('Dieser Browser kann den Standort nicht bestimmen.'); return; }
+    if (!window.isSecureContext) { if (loud) toast('Der Standort braucht eine sichere Verbindung (https).'); return; }
     if (watchId != null) return;
     watchId = navigator.geolocation.watchPosition((pos) => {
       const first = !state.me;
@@ -551,7 +563,7 @@
       return;
     }
     centerOnFix = true;
-    toast('Finding your position…', 2500);
+    toast('Standort wird gesucht …', 2500);
     if (watchId == null) startWatch(true);
   });
 
@@ -613,7 +625,7 @@
     fetch('events.json', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
     fetch('meta.json', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
   ]).then(([evs, m]) => init(evs, m))
-    .catch(() => toast('Could not load the programme. Check your connection and reload.', 10000));
+    .catch(() => toast('Das Programm konnte nicht geladen werden. Bitte Verbindung prüfen und neu laden.', 10000));
 
   window.__kn = { state, byId, map, openEvent }; // for debugging / tests
 })();

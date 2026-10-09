@@ -7,6 +7,9 @@ Sources (public; the same data the official map https://kulturnatten.dk/en/progr
   2. The official map page itself: venue opening hours per event (data-time on each <article>)
      and the "Event type" filter of the map (FacetWP facet "organizer_type").
 
+German titles: translations_de.json (original title -> German) is applied if present. Titles that
+are new or changed since the translation stay in the original language (title == title_orig).
+
 Python stdlib only. Usage:
   python3 fetch_events.py                 # fetch and write events.json / meta.json next to this script
   python3 fetch_events.py --cache DIR     # keep raw responses in DIR and reuse them on the next run
@@ -31,6 +34,15 @@ USER_AGENT = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.3
 EVENT_DATE = "2026-10-09"
 UTC_OFFSET = "+02:00"
 OUT_DIR = os.path.dirname(os.path.abspath(__file__))
+TRANSLATIONS = os.path.join(OUT_DIR, "translations_de.json")
+
+
+def load_translations():
+    try:
+        with open(TRANSLATIONS, encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
 
 
 def fetch(url, cache_dir, name):
@@ -91,7 +103,7 @@ def parse_map_page(page_html):
     return times, facet
 
 
-def build_event(raw, listing_times):
+def build_event(raw, listing_times, de):
     acf = raw.get("acf") or {}
     coords = acf.get("coordinates") or {}
     lat, lng = coords.get("lat"), coords.get("lng")
@@ -114,7 +126,7 @@ def build_event(raw, listing_times):
                 slots.append([hhmm(extra.get("start_time")), hhmm(extra.get("end_time"))])
         title = clean(sub.get("title_english")) or clean(sub.get("title"))
         if title or slots:
-            items.append({"title": title, "times": slots})
+            items.append({"title": de.get(title, title), "title_orig": title, "times": slots})
 
     zip_city = " ".join(p for p in (clean(acf.get("zip_code")), clean(acf.get("city"))) if p)
     address = ", ".join(p for p in (clean(acf.get("event_address")), zip_city) if p)
@@ -123,10 +135,12 @@ def build_event(raw, listing_times):
         lng = round(float(lng), 6)
     except (TypeError, ValueError):
         lat = lng = None
+    title = clean(acf.get("title_english")) or clean((raw.get("title") or {}).get("rendered"))
     return {
         "id": raw.get("id"),
         "number": clean(acf.get("assigned_area_number")) or None,
-        "title": clean(acf.get("title_english")) or clean((raw.get("title") or {}).get("rendered")),
+        "title": de.get(title, title),
+        "title_orig": title,
         "venue": clean(acf.get("organizer_name_en")) or clean(acf.get("organizer_name")),
         "address": address,
         "area": clean(acf.get("area_name")) or None,
@@ -159,7 +173,8 @@ def main():
         page += 1
     expected = headers.get("x-wp-total")
 
-    events = [build_event(r, listing_times) for r in raw_events]
+    de = load_translations()
+    events = [build_event(r, listing_times, de) for r in raw_events]
     events.sort(key=lambda e: (int(e["number"]) if (e["number"] or "").isdigit() else 99999, e["title"]))
 
     type_counts = {}
@@ -184,6 +199,7 @@ def main():
         "with_times": sum(1 for e in events if e["start"] and e["end"]),
         "without_type": sum(1 for e in events if not e["types"]),
         "canceled": sum(1 for e in events if e["canceled"]),
+        "untranslated_titles": sum(1 for e in events for t in [e] + e["items"] if t["title_orig"] and t["title_orig"] not in de),
         "types": types,
     }
 
