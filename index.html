@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kulturnatten Map</title>
+<meta name="description" content="Map of the Copenhagen Culture Night 2026 programme (Kulturnatten, 9 Oct 2026).">
+<meta name="theme-color" content="#f6f5f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16181d" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Kulturnatten">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316181d'/%3E%3Ccircle cx='22' cy='24' r='7' fill='%23dc2626'/%3E%3Ccircle cx='42' cy='20' r='5' fill='%23eab308'/%3E%3Ccircle cx='38' cy='42' r='8' fill='%236d28d9'/%3E%3Ccircle cx='18' cy='44' r='4' fill='%230284c7'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+      integrity="sha512-Zcn6bjR/8RZbLEpLIeOwNtzREBAJnUKESxces60Mpoj+2okopSAcSUIUOseddDm0cxnGQzxIR7vJgsLZbdLE3w=="
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="map" aria-label="Map of events"></div>
+
+<nav class="chips" id="chips" aria-label="Filter"></nav>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<button class="fab fab-route" id="routeBtn" type="button" aria-label="Show route">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8 18h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></svg>
+  <span class="badge" id="routeCount">0</span>
+</button>
+<button class="fab fab-locate" id="locateBtn" type="button" aria-label="Show my location">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/><circle cx="12" cy="12" r="6.5"/><circle class="dot" cx="12" cy="12" r="2.2"/></svg>
+</button>
+
+<section class="sheet" id="eventSheet" aria-modal="false" aria-labelledby="evTitle" hidden>
+  <div class="sheet-grip" data-close-swipe><span></span></div>
+  <button class="sheet-close" type="button" data-close aria-label="Close">&times;</button>
+  <div class="sheet-body" id="eventBody"></div>
+</section>
+
+<section class="sheet" id="routeSheet" aria-modal="false" aria-labelledby="routeTitle" hidden>
+  <div class="sheet-grip" data-close-swipe><span></span></div>
+  <button class="sheet-close" type="button" data-close aria-label="Close">&times;</button>
+  <div class="sheet-body" id="routeBody"></div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
+        integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="app.js"></script>
+</body>
+</html>

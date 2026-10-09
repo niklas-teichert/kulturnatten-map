@@ -1,0 +1,75 @@
+{
+  "source": "https://kulturnatten.dk/en/program-map/",
+  "api": "https://kulturnatten.dk/wp-json/wp/v2/events?lang=en&per_page=100&page=N",
+  "fetched_at": "2026-10-09T15:39:55+00:00",
+  "event_date": "2026-10-09",
+  "utc_offset": "+02:00",
+  "count": 217,
+  "api_total": 217,
+  "with_coordinates": 216,
+  "with_times": 214,
+  "without_type": 1,
+  "canceled": 3,
+  "types": [
+    {
+      "type": "Opdagelse på egen hånd",
+      "count": 117,
+      "map_filter_slug": "opdagelse-paa-egen-haand",
+      "map_filter_count": 116
+    },
+    {
+      "type": "Udstilling",
+      "count": 99,
+      "map_filter_slug": "udstilling",
+      "map_filter_count": 98
+    },
+    {
+      "type": "Rundvisning",
+      "count": 88,
+      "map_filter_slug": "rundvisning",
+      "map_filter_count": 87
+    },
+    {
+      "type": "Musik",
+      "count": 69,
+      "map_filter_slug": "musik",
+      "map_filter_count": 68
+    },
+    {
+      "type": "Workshop",
+      "count": 57,
+      "map_filter_slug": "workshop",
+      "map_filter_count": 56
+    },
+    {
+      "type": "Koncert",
+      "count": 48,
+      "map_filter_slug": "koncert",
+      "map_filter_count": 47
+    },
+    {
+      "type": "Foredrag",
+      "count": 47,
+      "map_filter_slug": "foredrag",
+      "map_filter_count": 47
+    },
+    {
+      "type": "Lysinstallation",
+      "count": 44,
+      "map_filter_slug": "lysinstallation",
+      "map_filter_count": 44
+    },
+    {
+      "type": "Forestilling",
+      "count": 30,
+      "map_filter_slug": "forestilling",
+      "map_filter_count": 30
+    },
+    {
+      "type": "Teater og optræden",
+      "count": 26,
+      "map_filter_slug": "teater-og-optraeden",
+      "map_filter_count": 26
+    }
+  ]
+}
